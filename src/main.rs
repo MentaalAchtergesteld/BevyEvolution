@@ -1,8 +1,10 @@
 use bevy::{app::App, ecs::system::Resource, DefaultPlugins};
+use food::FoodPlugin;
 use movement::MovementPlugin;
 use rand::{rngs::StdRng, SeedableRng};
 
 mod movement;
+mod food;
 
 #[derive(Resource)]
 struct GameRng(StdRng);
@@ -19,6 +21,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins((
             MovementPlugin,
+            FoodPlugin,
         ))
         .run();
 }
