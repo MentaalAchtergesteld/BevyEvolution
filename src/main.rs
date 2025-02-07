@@ -1,5 +1,8 @@
 use bevy::{app::App, ecs::system::Resource, DefaultPlugins};
+use movement::MovementPlugin;
 use rand::{rngs::StdRng, SeedableRng};
+
+mod movement;
 
 #[derive(Resource)]
 struct GameRng(StdRng);
@@ -14,5 +17,8 @@ fn main() {
     App::new()
         .insert_resource(GameRng::new(420))
         .add_plugins(DefaultPlugins)
+        .add_plugins((
+            MovementPlugin,
+        ))
         .run();
 }
