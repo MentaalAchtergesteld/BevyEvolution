@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
-use crate::movement::Acceleration;
+use crate::{movement::Acceleration, wrapping::{wrapping_delta, WrappingRect}};
 
 pub struct InteractionForcesPlugin;
 
@@ -44,6 +44,7 @@ fn setup_interaction_rules(
 fn apply_interaction_forces(
     mut query: Query<(&mut Acceleration, &InteractionGroup, &Transform, Entity)>,
     rules: Res<InteractionRules>,
+    wrapping_rect: Option<Res<WrappingRect>>
 ) {
     let mut food = query.iter_combinations_mut();
 
@@ -59,7 +60,12 @@ fn apply_interaction_forces(
             continue;
         };
 
-        let delta = (transform_b.translation - transform_a.translation).xy();
+        let delta = if let Some(rect) = &wrapping_rect {
+            wrapping_delta(transform_a.translation.xy(), transform_b.translation.xy(), rect)
+        } else {
+            (transform_b.translation - transform_a.translation).xy()
+        };
+        
         let distance = delta.length();
 
         if distance < force_params.min_distance {

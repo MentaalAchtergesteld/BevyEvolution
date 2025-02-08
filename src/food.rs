@@ -3,7 +3,7 @@ use std::f32::consts::TAU;
 use bevy::{color::palettes::css::GREEN, prelude::*, sprite::Material2d, window::PrimaryWindow};
 use rand::Rng;
 
-use crate::{interaction_forces::InteractionGroup, movement::{Acceleration, Velocity, VelocityDamping}, saturation::{Saturation, SaturationChange}, GameRng};
+use crate::{interaction_forces::InteractionGroup, movement::{Acceleration, Velocity, VelocityDamping}, saturation::{Saturation, SaturationChange}, wrapping::{wrapping_length, WrappingRect}, GameRng};
 
 pub struct FoodPlugin;
 
@@ -120,7 +120,7 @@ fn spawn_initial_food(
     let window = window_query.single();
     let window_size = window.size();
 
-    let food_count = 4;
+    let food_count = 32;
 
     for _ in 0..food_count {
         let position = Vec2::new(
@@ -165,7 +165,8 @@ fn update_food_radius(
 
 fn count_food_neighbours(
     mut foods: Query<(&mut Neighbourhood, &Transform, Entity), With<Food>>,
-    other_foods: Query<(&Transform, Entity), With<Food>>
+    other_foods: Query<(&Transform, Entity), With<Food>>,
+    wrapping_rect: Option<Res<WrappingRect>>,
 ) {
     for (mut neighbourhood, transform_a, entity_a) in &mut foods {
         neighbourhood.count = 0;
@@ -175,7 +176,13 @@ fn count_food_neighbours(
                 continue;
             };
 
-            if transform_a.translation.distance(transform_b.translation) < neighbourhood.radius {
+            let distance = if let Some(rect) = &wrapping_rect {
+                wrapping_length(transform_a.translation.xy(), transform_b.translation.xy(), rect)
+            } else {
+                transform_a.translation.distance(transform_b.translation)
+            };
+
+            if distance < neighbourhood.radius {
                 neighbourhood.count += 1;
             }
         }
