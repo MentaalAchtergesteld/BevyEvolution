@@ -9,7 +9,6 @@ pub struct InteractionForcesPlugin;
 impl Plugin for InteractionForcesPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, setup_interaction_rules)
             .add_systems(Update, apply_interaction_forces);
     }
 }
@@ -26,20 +25,6 @@ pub struct ForceParams {
 
 #[derive(Component)]
 pub struct InteractionGroup(pub u8);
-
-fn setup_interaction_rules(
-    mut commands: Commands
-) {
-    let mut rules = HashMap::new();
-    rules.insert((0, 0), ForceParams {
-        attract_strength: 8.0,
-        repulse_strength: 64.0,
-        min_distance: 16.0,
-        max_distance: 128.0
-    });
-
-    commands.insert_resource(InteractionRules(rules));
-}
 
 fn apply_interaction_forces(
     mut query: Query<(&mut Acceleration, &InteractionGroup, &Transform, Entity)>,

@@ -1,6 +1,6 @@
 use std::f32::consts::TAU;
 
-use bevy::{color::palettes::css::GREEN, prelude::*, sprite::Material2d, window::PrimaryWindow};
+use bevy::{color::palettes::css::GREEN, prelude::*, sprite::Material2d};
 use rand::Rng;
 
 use crate::{interaction_forces::InteractionGroup, movement::{Acceleration, Velocity, VelocityDamping}, saturation::{Saturation, SaturationChange}, wrapping::{wrapping_length, WrappingRect}, GameRng};
@@ -10,7 +10,6 @@ pub struct FoodPlugin;
 impl Plugin for FoodPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, spawn_initial_food)
             .add_systems(Update, (
                 update_food_radius,
                 count_food_neighbours,
@@ -58,7 +57,7 @@ struct FoodBundle<T: Material2d> {
     material: MeshMaterial2d<T>
 }
 
-fn spawn_food(
+pub fn spawn_food(
     position: Vec2,
     max_saturation: f32,
     saturation: f32,
@@ -108,51 +107,6 @@ fn spawn_food(
         mesh,
         material
     }).id()
-}
-
-fn spawn_initial_food(
-    window_query: Query<&Window, With<PrimaryWindow>>,
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    mut rng: ResMut<GameRng>
-) {
-    let window = window_query.single();
-    let window_size = window.size();
-
-    let food_count = 32;
-
-    for _ in 0..food_count {
-        let position = Vec2::new(
-            rng.0.random_range(-window_size.x*0.5..window_size.x*0.5),
-            rng.0.random_range(-window_size.y*0.5..window_size.y*0.5),
-        );
-
-        let max_saturation = rng.0.random_range(5.0..10.0);
-        let start_saturation = max_saturation * 0.5;
-        let saturation_change = 0.5;
-
-        let max_neighbours_for_split = 8;
-        let min_split_saturation = max_saturation * 0.75;
-        let split_chance = 0.001;
-
-        let neighbourhood_radius = 64.;
-
-        spawn_food(
-            position,
-            max_saturation,
-            start_saturation,
-            saturation_change,
-            max_neighbours_for_split,
-            min_split_saturation,
-            split_chance,
-            neighbourhood_radius,
-            &mut commands,
-            &mut meshes,
-            &mut materials,
-            &mut rng.0
-        );
-    }
 }
 
 fn update_food_radius(
