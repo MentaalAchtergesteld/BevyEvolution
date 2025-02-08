@@ -19,10 +19,14 @@ pub struct Age {
 pub struct MaxAge(pub f32);
 
 fn update_age(
-    mut query: Query<&mut Age>,
+    mut query: Query<(&mut Age, Option<&MaxAge>)>,
     time: Res<Time>
 ) {
-    for mut age in &mut query {
+    for (mut age, max_age) in &mut query {
         age.current += age.change * time.delta_secs();
+
+        if let Some(max_age) = max_age {
+            age.current = age.current.min(max_age.0);
+        }
     }
 }
