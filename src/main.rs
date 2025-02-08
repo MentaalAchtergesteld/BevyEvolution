@@ -2,6 +2,7 @@ use age::AgePlugin;
 use bevy::{app::{App, Startup}, core_pipeline::core_2d::Camera2d, ecs::system::{Commands, Resource}, DefaultPlugins};
 use food::FoodPlugin;
 use interaction_forces::InteractionForcesPlugin;
+use mortality::MortalityPlugin;
 use movement::MovementPlugin;
 use rand::{rngs::StdRng, SeedableRng};
 use saturation::SaturationPlugin;
@@ -9,6 +10,7 @@ use saturation::SaturationPlugin;
 mod movement;
 mod saturation;
 mod age;
+mod mortality;
 mod interaction_forces;
 mod food;
 
@@ -29,6 +31,7 @@ fn main() {
             MovementPlugin,
             SaturationPlugin,
             AgePlugin,
+            MortalityPlugin,
             InteractionForcesPlugin,
             FoodPlugin,
         ))
