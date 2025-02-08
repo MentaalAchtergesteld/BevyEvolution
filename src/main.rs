@@ -1,9 +1,11 @@
-use bevy::{app::App, ecs::system::Resource, DefaultPlugins};
+use bevy::{app::{App, Startup}, core_pipeline::core_2d::Camera2d, ecs::system::{Commands, Resource}, DefaultPlugins};
 use food::FoodPlugin;
+use interaction_forces::InteractionForcesPlugin;
 use movement::MovementPlugin;
 use rand::{rngs::StdRng, SeedableRng};
 
 mod movement;
+mod interaction_forces;
 mod food;
 
 #[derive(Resource)]
@@ -21,7 +23,13 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins((
             MovementPlugin,
+            InteractionForcesPlugin,
             FoodPlugin,
         ))
+        .add_systems(Startup, spawn_camera)
         .run();
+}
+
+fn spawn_camera(mut commands: Commands) {
+    commands.spawn(Camera2d::default());
 }

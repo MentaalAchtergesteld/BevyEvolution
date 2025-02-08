@@ -9,6 +9,7 @@ impl Plugin for MovementPlugin {
                 update_velocity,
                 damp_velocity,
                 clamp_velocity,
+                cutoff_velocity,
                 update_position,
                 update_rotation
             ));
@@ -38,10 +39,6 @@ fn update_velocity(
 
         velocity.0 += acceleration.0 * time.delta_secs();
 
-        if velocity.0.length_squared() < 1e-5 {
-            velocity.0 = Vec2::ZERO;
-        }
-
         acceleration.0 = Vec2::ZERO;
     }
 }
@@ -61,6 +58,16 @@ fn clamp_velocity(
 ) {
     for (mut velocity, max_velocity) in &mut query {
         velocity.0 = velocity.0.clamp_length_max(max_velocity.0);
+    }
+}
+
+fn cutoff_velocity(
+    mut query: Query<&mut Velocity>
+) {
+    for mut velocity in &mut query {
+        if velocity.0.length_squared() < 1e-5 {
+            velocity.0 = Vec2::ZERO;
+        }   
     }
 }
 
