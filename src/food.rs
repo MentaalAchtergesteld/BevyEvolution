@@ -3,7 +3,7 @@ use std::f32::consts::TAU;
 use bevy::{color::palettes::css::GREEN, prelude::*, sprite::Material2d, window::PrimaryWindow};
 use rand::Rng;
 
-use crate::{interaction_forces::InteractionGroup, movement::{Acceleration, Velocity, VelocityDamping}, saturation::Saturation, GameRng};
+use crate::{interaction_forces::InteractionGroup, movement::{Acceleration, Velocity, VelocityDamping}, saturation::{Saturation, SaturationChange}, GameRng};
 
 pub struct FoodPlugin;
 
@@ -45,6 +45,7 @@ impl Neighbourhood {
 struct FoodBundle<T: Material2d> {
     food: Food,
     saturation: Saturation,
+    saturation_change: SaturationChange,
     neighbourhood: Neighbourhood,
     transform: Transform,
     velocity: Velocity,
@@ -96,8 +97,8 @@ fn spawn_food(
         saturation: Saturation {
             current: saturation,
             max: max_saturation,
-            change_per_sec: saturation_change
         },
+        saturation_change: SaturationChange(saturation_change),
         neighbourhood: Neighbourhood::new(neighbourhood_radius),
         transform,
         velocity,
@@ -133,7 +134,7 @@ fn spawn_initial_food(
 
         let max_neighbours_for_split = 8;
         let min_split_saturation = max_saturation * 0.75;
-        let split_chance = 0.01;
+        let split_chance = 0.001;
 
         let neighbourhood_radius = 64.;
 

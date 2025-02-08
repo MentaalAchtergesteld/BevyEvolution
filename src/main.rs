@@ -1,3 +1,4 @@
+use age::AgePlugin;
 use bevy::{app::{App, Startup}, core_pipeline::core_2d::Camera2d, ecs::system::{Commands, Resource}, DefaultPlugins};
 use food::FoodPlugin;
 use interaction_forces::InteractionForcesPlugin;
@@ -7,6 +8,7 @@ use saturation::SaturationPlugin;
 
 mod movement;
 mod saturation;
+mod age;
 mod interaction_forces;
 mod food;
 
@@ -26,6 +28,7 @@ fn main() {
         .add_plugins((
             MovementPlugin,
             SaturationPlugin,
+            AgePlugin,
             InteractionForcesPlugin,
             FoodPlugin,
         ))
