@@ -3,8 +3,10 @@ use food::FoodPlugin;
 use interaction_forces::InteractionForcesPlugin;
 use movement::MovementPlugin;
 use rand::{rngs::StdRng, SeedableRng};
+use saturation::SaturationPlugin;
 
 mod movement;
+mod saturation;
 mod interaction_forces;
 mod food;
 
@@ -23,6 +25,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins((
             MovementPlugin,
+            SaturationPlugin,
             InteractionForcesPlugin,
             FoodPlugin,
         ))

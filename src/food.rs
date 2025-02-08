@@ -3,7 +3,7 @@ use std::f32::consts::TAU;
 use bevy::{color::palettes::css::GREEN, prelude::*, sprite::Material2d, window::PrimaryWindow};
 use rand::Rng;
 
-use crate::{interaction_forces::InteractionGroup, movement::{Acceleration, Velocity, VelocityDamping}, GameRng};
+use crate::{interaction_forces::InteractionGroup, movement::{Acceleration, Velocity, VelocityDamping}, saturation::Saturation, GameRng};
 
 pub struct FoodPlugin;
 
@@ -15,7 +15,6 @@ impl Plugin for FoodPlugin {
                 update_food_radius,
                 count_food_neighbours,
                 food_splitting,
-                apply_saturation_change,
             ));
     }
 }
@@ -25,21 +24,6 @@ pub struct Food {
     pub max_neighbours_for_split: i32,
     pub min_split_saturation: f32,
     pub split_chance: f64
-}
-
-#[derive(Component)]
-pub struct Saturation {
-    pub saturation: f32,
-    pub max_saturation: f32,
-    pub saturation_change: f32
-}
-
-impl Saturation {
-    fn modify(&mut self, amount: f32) {
-        self.saturation += amount;
-
-        self.saturation = self.saturation.min(self.max_saturation).max(0.0);
-    }
 }
 
 #[derive(Component)]
@@ -110,9 +94,9 @@ fn spawn_food(
             split_chance
         },
         saturation: Saturation {
-            saturation,
-            max_saturation,
-            saturation_change
+            current: saturation,
+            max: max_saturation,
+            change_per_sec: saturation_change
         },
         neighbourhood: Neighbourhood::new(neighbourhood_radius),
         transform,
@@ -174,7 +158,7 @@ fn update_food_radius(
     mut query: Query<(&mut Transform, &Saturation), With<Food>>,
 ) {
     for (mut transform, saturation) in &mut query {
-        transform.scale = Vec2::splat(saturation.saturation).extend(0.);
+        transform.scale = Vec2::splat(saturation.current).extend(0.);
     }
 }
 
@@ -205,19 +189,19 @@ fn food_splitting(
     mut rng: ResMut<GameRng>
 ) {
     for (mut saturation, neighbourhood, food, transform) in &mut query {
-        if neighbourhood.count > food.max_neighbours_for_split || saturation.saturation < food.min_split_saturation {
+        if neighbourhood.count > food.max_neighbours_for_split || saturation.current < food.min_split_saturation {
             continue;
         }
 
         if rng.0.random_bool(food.split_chance) {
-            let max_saturation = saturation.max_saturation * rng.0.random_range(0.9..1.1);
+            let max_saturation = saturation.max * rng.0.random_range(0.9..1.1);
 
             if max_saturation < 1. {
                 continue;
             }
 
-            let new_saturation = saturation.saturation * 0.5;
-            let saturation_change = saturation.saturation_change;
+            let new_saturation = saturation.current * 0.5;
+            let saturation_change = saturation.current;
             let max_neighbours_for_split = food.max_neighbours_for_split;
             let min_split_saturation = food.min_split_saturation;
             let split_chance = food.split_chance;
@@ -236,17 +220,7 @@ fn food_splitting(
                 &mut materials,
                 &mut rng.0
             );
-            saturation.saturation *= 0.5;
+            saturation.current *= 0.5;
         }
-    }
-}
-
-fn apply_saturation_change(
-    mut query: Query<&mut Saturation>,
-    time: Res<Time>
-) {
-    for mut saturation in &mut query {
-        let change = saturation.saturation_change * time.delta_secs();
-        saturation.modify(change);
     }
 }
