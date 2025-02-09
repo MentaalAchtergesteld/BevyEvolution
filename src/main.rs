@@ -91,7 +91,7 @@ fn spawn_initial_food(
     let window = window_query.single();
     let window_size = window.size();
 
-    let food_count = 32;
+    let food_count = 5;
 
     for _ in 0..food_count {
         let position = Vec2::new(
